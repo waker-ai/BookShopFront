@@ -108,7 +108,7 @@ const router = useRouter()
 
 // --- 状态数据 ---
 const searchKeyword = ref('')
-const isLogin = ref(true) // 模拟登录状态，实际应从 Pinia/Vuex 获取
+const isLogin = ref(true) // 模拟登录状态
 const cartCount = ref(5)
 
 // --- 事件处理 ---
@@ -117,24 +117,24 @@ const cartCount = ref(5)
 const handleSearch = () => {
   if (!searchKeyword.value.trim()) return
   console.log('搜索:', searchKeyword.value)
-  // router.push({ path: '/search', query: { q: searchKeyword.value } })
 }
 
-// 2. 下拉菜单命令处理 (关键修改)
+// 2. 下拉菜单命令处理
 const handleCommand = (command) => {
   if (command === 'logout') {
-    // 处理登出逻辑
     isLogin.value = false
     ElMessage.success('已安全退出登录')
     router.push('/')
   } else {
-    // 处理路由跳转 (/user/profile 或 /user/orders)
     router.push(command)
   }
 }
 </script>
 
 <style scoped lang="scss">
+/* ✅ 1. 引入 Sass 颜色模块来解决警告 */
+@use "sass:color";
+
 /* 定义番茄主题色变量 */
 $tomato-color: #ff6700;
 $tomato-light: #ffefe6;
@@ -210,7 +210,8 @@ $layout-width: 1200px;
     box-shadow: none;
 
     &:hover {
-      background-color: darken($tomato-color, 5%);
+      /* ✅ 2. 使用 color.adjust 替代 darken */
+      background-color: color.adjust($tomato-color, $lightness: -5%);
     }
   }
 
@@ -287,7 +288,7 @@ $layout-width: 1200px;
 /* --- 主体与页脚 --- */
 .main-body {
   background-color: #f5f7fa;
-  padding: 0; /* 关键：去掉默认 padding，由子页面自己控制 */
+  padding: 0;
   flex: 1;
   display: flex;
   flex-direction: column;

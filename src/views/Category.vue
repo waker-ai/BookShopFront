@@ -31,6 +31,7 @@
       <!-- 3. 书籍列表区域 -->
       <div class="book-list-wrapper" v-loading="loading">
         <div class="book-grid" v-if="bookList.length > 0">
+          <!-- 这里调用引入的 BookCard 组件 -->
           <BookCard
               v-for="book in bookList"
               :key="book.id"
@@ -58,9 +59,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { View, ShoppingCart } from '@element-plus/icons-vue'
+
+// ✅ 关键修改：引入独立的组件文件
+// 请确保你已经创建了 src/components/BookCard.vue 文件
+import BookCard from '@/components/BookCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -88,7 +92,6 @@ const sortOptions = [
 ]
 
 // --- Mock Data 生成器 ---
-// 为了演示效果，我们根据分类生成不同的模拟数据
 const generateMockBooks = (type) => {
   const baseBooks = [
     { id: 101, title: 'Python编程：从入门到实践', author: 'Eric Matthes', price: 69.00, originalPrice: 89.00, cover: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400', rating: 9.8, tags: ['编程'] },
@@ -101,19 +104,17 @@ const generateMockBooks = (type) => {
     { id: 108, title: '且以优雅过一生', author: '杨绛', price: 32.00, originalPrice: 40.00, cover: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400', rating: 9.3, tags: ['文学'] },
   ]
 
-  // 根据分类做一点简单的过滤模拟
-  if (type === 'new') return baseBooks.slice(0, 4) // 取前4本
-  if (type === 'sale') return baseBooks.filter(b => b.originalPrice > 0) // 有原价的
-  if (type === 'ebook') return baseBooks.map(b => ({ ...b, tags: [...b.tags, '电子书'] })) // 加上标签
+  if (type === 'new') return baseBooks.slice(0, 4)
+  if (type === 'sale') return baseBooks.filter(b => b.originalPrice > 0)
+  if (type === 'ebook') return baseBooks.map(b => ({ ...b, tags: [...b.tags, '电子书'] }))
 
-  return baseBooks // 默认返回全部
+  return baseBooks
 }
 
 const bookList = ref([])
 
 const fetchData = () => {
   loading.value = true
-  // 模拟网络延迟
   setTimeout(() => {
     bookList.value = generateMockBooks(categoryType.value)
     loading.value = false
@@ -123,14 +124,13 @@ const fetchData = () => {
 const handleSort = (sortType) => {
   currentSort.value = sortType
   loading.value = true
-  // 简单的排序模拟
   setTimeout(() => {
     if (sortType === 'price_asc') {
       bookList.value.sort((a, b) => a.price - b.price)
     } else if (sortType === 'rating') {
       bookList.value.sort((a, b) => b.rating - a.rating)
     } else {
-      bookList.value = generateMockBooks(categoryType.value) // 重置
+      bookList.value = generateMockBooks(categoryType.value)
     }
     loading.value = false
   }, 300)
@@ -140,56 +140,18 @@ const goToDetail = (id) => {
   router.push({ name: 'ProductDetail', params: { id } })
 }
 
-// 监听路由参数变化（例如从 /category/new 变到 /category/sale）
+// 监听路由变化
 watch(() => route.params.type, () => {
   fetchData()
 }, { immediate: true })
 
 </script>
 
-<!--
-  这里我们再次定义了 BookCard。
-  最佳实践建议：将 BookCard 提取到 src/components/BookCard.vue 中，
-  然后在 Home.vue 和 Category.vue 中 import BookCard from '@/components/BookCard.vue'
--->
-<script>
-import { defineComponent } from 'vue'
-export const BookCard = defineComponent({
-  name: 'BookCard',
-  props: ['book'],
-  emits: ['click'],
-  template: `
-    <div class="book-card" @click="$emit('click')">
-      <div class="card-image-wrapper">
-        <el-image :src="book.cover" fit="cover" loading="lazy" class="book-cover">
-          <template #placeholder><div class="image-slot">...</div></template>
-        </el-image>
-      </div>
-
-      <div class="card-content">
-        <div class="book-tags" v-if="book.tags">
-          <span v-for="tag in book.tags" :key="tag" class="mini-tag">{{ tag }}</span>
-        </div>
-        <h3 class="book-title" :title="book.title">{{ book.title }}</h3>
-        <p class="book-author">{{ book.author }}</p>
-        <div class="book-meta">
-          <div class="price-box">
-             <span class="currency">¥</span>
-             <span class="current-price">{{ book.price }}</span>
-             <span class="original-price" v-if="book.originalPrice && book.originalPrice > book.price">¥{{ book.originalPrice }}</span>
-          </div>
-          <el-button type="primary" plain circle icon="ShoppingCart" size="small" class="add-btn" @click.stop />
-        </div>
-      </div>
-    </div>
-  `
-})
-</script>
+<!-- ✅ 这里的旧 <script> 块已经被删除了，不要加回来 -->
 
 <style scoped lang="scss">
 /* 公共变量 */
 $primary-color: #409eff;
-$tomato-color: #ff6700;
 $text-main: #303133;
 $text-secondary: #909399;
 $container-width: 1200px;
@@ -197,7 +159,7 @@ $container-width: 1200px;
 .category-page {
   padding: 24px 0 60px;
   background-color: #f5f7fa;
-  min-height: calc(100vh - 64px); /* 减去头部高度 */
+  min-height: calc(100vh - 64px);
 }
 
 .container {
@@ -206,10 +168,8 @@ $container-width: 1200px;
   padding: 0 20px;
 }
 
-/* 头部 */
 .page-header {
   margin-bottom: 24px;
-
   .category-title {
     margin-top: 16px;
     font-size: 28px;
@@ -218,7 +178,6 @@ $container-width: 1200px;
   }
 }
 
-/* 工具栏 */
 .toolbar {
   background: white;
   padding: 16px 24px;
@@ -244,7 +203,6 @@ $container-width: 1200px;
         color: $primary-color;
         font-weight: bold;
         position: relative;
-
         &::after {
           content: '';
           position: absolute;
@@ -267,7 +225,6 @@ $container-width: 1200px;
   }
 }
 
-/* 书籍网格 */
 .book-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -275,60 +232,9 @@ $container-width: 1200px;
   min-height: 300px;
 }
 
-/* 分页 */
 .pagination-wrapper {
   margin-top: 40px;
   display: flex;
   justify-content: center;
-}
-
-/* --- 卡片样式 (与首页保持一致) --- */
-:deep(.book-card) {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 1px solid transparent;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-  }
-
-  .card-image-wrapper {
-    height: 220px;
-    background: #f8f8f8;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .book-cover {
-      width: 100%;
-      height: 100%;
-      transition: transform 0.5s;
-    }
-    &:hover .book-cover { transform: scale(1.05); }
-  }
-
-  .card-content { padding: 16px; }
-
-  .book-tags {
-    margin-bottom: 8px; display: flex; gap: 4px;
-    .mini-tag { font-size: 10px; padding: 2px 6px; background: #e6f7ff; color: $primary-color; border-radius: 4px; }
-  }
-
-  .book-title { margin: 0 0 6px; font-size: 15px; font-weight: 600; color: $text-main; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .book-author { color: $text-secondary; font-size: 12px; margin: 0 0 12px; }
-
-  .book-meta { display: flex; justify-content: space-between; align-items: flex-end; }
-
-  .price-box {
-    color: #ff4d4f; line-height: 1;
-    .currency { font-size: 12px; margin-right: 2px; }
-    .current-price { font-size: 18px; font-weight: bold; }
-    .original-price { font-size: 12px; color: #ccc; text-decoration: line-through; margin-left: 6px; }
-  }
 }
 </style>
