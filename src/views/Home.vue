@@ -1,68 +1,114 @@
 <template>
-  <div class="bookstore-app">
-    <main class="container main-content">
+  <div class="bookstore-home">
+    <div class="container">
 
-      <!-- 1. 广告轮播 (保持不变) -->
-      <el-carousel trigger="click" height="380px" class="banner-carousel">
-        <el-carousel-item v-for="(banner, index) in banners" :key="index">
-          <div class="banner-item" :style="{ backgroundImage: `linear-gradient(120deg, ${banner.color1} 0%, ${banner.color2} 100%)` }">
-            <div class="banner-content">
-              <span class="banner-tag">年度重磅</span>
-              <h1>{{ banner.title }}</h1>
-              <p>{{ banner.subtitle }}</p>
-              <el-button type="primary" size="large" class="banner-btn" @click="goToDetail(banner.relatedId)">
-                立即查看 <el-icon class="el-icon--right"><Right /></el-icon>
-              </el-button>
+      <!-- 1. 沉浸式轮播图 (Glassmorphism 风格) -->
+      <div class="banner-wrapper">
+        <el-carousel trigger="click" height="420px" class="premium-carousel" :interval="6000">
+          <el-carousel-item v-for="(banner, index) in banners" :key="index">
+            <div class="banner-slide" :style="{ background: `linear-gradient(135deg, ${banner.bgStart} 0%, ${banner.bgEnd} 100%)` }">
+              <!-- 左侧文字内容 -->
+              <div class="banner-content">
+                <div class="tag-badge">
+                  <el-icon><Trophy /></el-icon> {{ banner.tag }}
+                </div>
+                <h1 class="title">{{ banner.title }}</h1>
+                <p class="subtitle">{{ banner.subtitle }}</p>
+                <el-button type="primary" round size="large" class="action-btn" @click="goToDetail(banner.relatedId)">
+                  立即试读 <el-icon class="el-icon--right"><Right /></el-icon>
+                </el-button>
+              </div>
+              <!-- 右侧装饰插图 -->
+              <div class="banner-visual">
+                <div class="visual-circle"></div>
+                <!-- 封面图悬浮 -->
+                <el-image
+                    class="featured-cover"
+                    :src="banner.cover"
+                    fit="cover"
+                />
+              </div>
             </div>
-            <div class="banner-img-placeholder">
-              <el-icon :size="150" color="rgba(255,255,255,0.3)"><Reading /></el-icon>
-            </div>
-          </div>
-        </el-carousel-item>
-      </el-carousel>
+          </el-carousel-item>
+        </el-carousel>
+      </div>
 
-      <!-- 2. 特色分类入口 (保持不变) -->
-      <div class="feature-grid">
+      <!-- 2. 功能分类导航 (带图标渐变卡片) -->
+      <div class="feature-dock">
         <div
-            class="feature-item"
+            class="feature-card"
             v-for="item in features"
-            :key="item.title"
+            :key="item.key"
             @click="navigateToCategory(item.key)"
         >
-          <div class="feature-icon" :style="{ background: item.bg }">
-            <el-icon :size="24" :color="item.color"><component :is="item.icon" /></el-icon>
+          <!-- 图标容器：渐变背景 -->
+          <div
+              class="icon-box"
+              :style="{ background: `linear-gradient(135deg, ${item.bgStart} 0%, ${item.bgEnd} 100%)` }"
+          >
+            <el-icon :size="24" color="#fff"><component :is="item.icon" /></el-icon>
           </div>
-          <span class="feature-title">{{ item.title }}</span>
+
+          <div class="text-box">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.desc }}</p>
+          </div>
+
+          <!-- 右侧交互箭头 -->
+          <div class="action-icon">
+            <el-icon><ArrowRight /></el-icon>
+          </div>
         </div>
       </div>
 
-      <!-- 3. 热门书籍列表 (修改处：去掉了 Tab 切换，直接展示) -->
-      <div class="recommend-section">
+      <!-- 3. 全量馆藏书籍 (3D 展示架) -->
+      <div class="bookshelf-section">
         <div class="section-header">
-          <h2>热门推荐</h2>
-          <!-- 点击查看全部跳转到 'bestseller' 分类 -->
-          <el-button link @click="navigateToCategory('bestseller')">
-            查看更多 <el-icon><ArrowRight /></el-icon>
+          <div class="title-group">
+            <span class="indicator"></span>
+            <h2>全部馆藏</h2>
+            <span class="subtitle-text">精选 {{ salesBooks.length }} 本好书，等你翻阅</span>
+          </div>
+          <el-button link class="more-btn" @click="navigateToCategory('bestseller')">
+            分类筛选 <el-icon><Filter /></el-icon>
           </el-button>
         </div>
 
-        <div class="book-grid">
-          <!-- 直接使用引入的 BookCard 组件 -->
-          <BookCard
+        <div class="bookshelf-grid">
+          <div
               v-for="book in salesBooks"
               :key="book.id"
-              :book="book"
+              class="book-item-wrapper"
               @click="goToDetail(book.id)"
-          />
+          >
+            <!-- 3D 书籍核心结构 -->
+            <div class="book-3d">
+              <div class="book-cover">
+                <img :src="book.cover" :alt="book.title" loading="lazy" />
+                <div class="book-spine"></div> <!-- 书脊 -->
+                <div class="book-sheen"></div> <!-- 光泽 -->
+              </div>
+            </div>
+
+            <!-- 书籍信息 -->
+            <div class="book-info">
+              <h3 class="book-title" :title="book.title">{{ book.title }}</h3>
+              <p class="book-author">{{ book.author }}</p>
+              <div class="book-meta">
+                <span class="price">
+                  <span class="symbol">¥</span>{{ book.price }}
+                </span>
+                <!-- 高分标签 -->
+                <el-tag size="small" effect="light" round v-if="book.rating >= 9.0" type="danger" class="score-tag">
+                  {{ book.rating }}
+                </el-tag>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-    </main>
-
-    <!-- 简易页脚 -->
-    <footer class="site-footer">
-      <p>© 2025 云端书屋 Bookstore. All rights reserved.</p>
-    </footer>
+    </div>
   </div>
 </template>
 
@@ -70,36 +116,69 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  Right, Reading, ArrowRight,
-  Trophy, DataLine, Collection, Present
+  Right, ArrowRight, Trophy, DataLine, Collection, Present, Filter
 } from '@element-plus/icons-vue'
-
-// ✅ 关键：引入你在 Category.vue 中已经创建好的组件
-// 这样就不会报错 "runtime compilation is not supported"
-import BookCard from '@/components/BookCard.vue'
 
 const router = useRouter()
 
-// --- Data ---
+// --- 轮播配置 ---
 const banners = [
-  { title: '重构：改善既有代码的设计', subtitle: '限时 5 折起，程序员必读经典', color1: '#84fab0', color2: '#8fd3f4', relatedId: 1 },
-  { title: '深入理解计算机系统', subtitle: '揭开计算机系统的神秘面纱', color1: '#fccb90', color2: '#d57eeb', relatedId: 2 },
-  { title: '设计模式之禅', subtitle: '年度好书大促，满 100 减 50', color1: '#e0c3fc', color2: '#8ec5fc', relatedId: 3 }
+  {
+    title: '重构：改善既有代码的设计',
+    subtitle: '软件工程领域的经典之作，第2版全新升级',
+    tag: '年度重磅',
+    bgStart: '#fdfbfb', bgEnd: '#ebedee',
+    cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400',
+    relatedId: 1
+  },
+  {
+    title: '深入理解计算机系统',
+    subtitle: '程序员必读神书，揭开系统底层的神秘面纱',
+    tag: '镇店之宝',
+    bgStart: '#fff1eb', bgEnd: '#ace0f9',
+    cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
+    relatedId: 2
+  },
+  {
+    title: '设计模式之禅',
+    subtitle: '通俗易懂的 Java 设计模式指南',
+    tag: '限时特惠',
+    bgStart: '#e6e9f0', bgEnd: '#eef1f5',
+    cover: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=400',
+    relatedId: 3
+  }
 ]
 
+// --- 分类入口配置 (图标对象) ---
 const features = [
-  { title: '新书首发', key: 'new', icon: 'Present', bg: '#fff0f0', color: '#ff4d4f' },
-  { title: '电子书', key: 'ebook', icon: 'Collection', bg: '#f0f5ff', color: '#409eff' },
-  { title: '畅销榜', key: 'bestseller', icon: 'Trophy', bg: '#fff7e6', color: '#faad14' },
-  { title: '特价区', key: 'sale', icon: 'DataLine', bg: '#f6ffed', color: '#52c41a' },
+  {
+    title: '新书首发', desc: '抢先阅读', key: 'new',
+    icon: Present,
+    bgStart: '#ffecd2', bgEnd: '#fcb69f'
+  },
+  {
+    title: '电子书库', desc: '随时随地', key: 'ebook',
+    icon: Collection,
+    bgStart: '#d4fc79', bgEnd: '#96e6a1'
+  },
+  {
+    title: '畅销榜单', desc: '大家都在看', key: 'bestseller',
+    icon: Trophy,
+    bgStart: '#ffe259', bgEnd: '#ffa751'
+  },
+  {
+    title: '特价专区', desc: '低至3折', key: 'sale',
+    icon: DataLine,
+    bgStart: '#a1c4fd', bgEnd: '#c2e9fb'
+  },
 ]
 
-// 模拟数据
+// --- 全量书籍数据 ---
 const salesBooks = ref([
   { id: 1, title: '软件工程与计算', price: 89.00, originalPrice: 110.00, cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=300&q=80', author: '骆斌', rating: 4.8, tags: ['教材', '热销'] },
-  { id: 2, title: '深入理解计算机系统', price: 129.00, originalPrice: 159.00, cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80', author: 'Randal E. Bryant', rating: 4.9, tags: ['经典', '硬核'] },
-  { id: 3, title: 'Vue.js设计与实现', price: 79.00, originalPrice: 99.00, cover: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=300&q=80', author: '霍春阳', rating: 4.9, tags: ['前端'] },
-  { id: 4, title: 'JavaScript高级程序设计', price: 99.00, originalPrice: 129.00, cover: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=300&q=80', author: 'Matt Frisbie', rating: 4.7, tags: ['红宝书'] },
+  { id: 2, title: '深入理解计算机系统', price: 129.00, originalPrice: 159.00, cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80', author: 'Randal E. Bryant', rating: 9.9, tags: ['经典', '硬核'] },
+  { id: 3, title: 'Vue.js设计与实现', price: 79.00, originalPrice: 99.00, cover: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=300&q=80', author: '霍春阳', rating: 9.9, tags: ['前端'] },
+  { id: 4, title: 'JavaScript高级程序设计', price: 99.00, originalPrice: 129.00, cover: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=300&q=80', author: 'Matt Frisbie', rating: 9.7, tags: ['红宝书'] },
   { id: 5, title: '算法导论', price: 128.00, originalPrice: 168.00, cover: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400', author: 'Thomas H. Cormen', rating: 9.9, tags: ['硬核'] },
   { id: 6, title: '解忧杂货店', price: 39.00, originalPrice: 45.00, cover: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400', author: '东野圭吾', rating: 9.2, tags: ['小说'] },
   { id: 7, title: '设计模式', price: 45.00, originalPrice: 0, cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400', author: 'GoF', rating: 9.7, tags: ['经典'] },
@@ -144,7 +223,7 @@ const salesBooks = ref([
   { id: 34, title: '大江大河', price: 128.00, originalPrice: 158.00, cover: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?w=400', author: '阿耐', rating: 8.9, tags: ['励志'] },
   { id: 35, title: '局外人', price: 28.00, originalPrice: 35.00, cover: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400', author: '加缪', rating: 9.1, tags: ['荒诞'] },
   { id: 36, title: '海子诗全集', price: 98.00, originalPrice: 118.00, cover: 'https://images.unsplash.com/photo-1524143878510-e3b8d6312402?w=400', author: '海子', rating: 9.5, tags: ['诗歌'] },
-  { id: 27, title: '平凡的世界', price: 108.00, originalPrice: 138.00, cover: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400', author: '路遥', rating: 9.3, tags: ['长篇'] },
+  { id: 37, title: '平凡的世界', price: 108.00, originalPrice: 138.00, cover: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400', author: '路遥', rating: 9.3, tags: ['长篇'] },
   { id: 38, title: '时间的秩序', price: 56.00, originalPrice: 0, cover: 'https://images.unsplash.com/photo-1501139083538-0139583c060f?w=400', author: '卡洛·罗韦利', rating: 9.0, tags: ['科普'] },
 
   // --- 心理与社会科学 ---
@@ -187,7 +266,7 @@ const salesBooks = ref([
 
 // --- 路由跳转逻辑 ---
 const goToDetail = (id) => {
-  router.push({ name: 'ProductDetail', params: { id:id } })
+  router.push({ name: 'ProductDetail', params: { id: id } })
 }
 
 const navigateToCategory = (key) => {
@@ -195,114 +274,366 @@ const navigateToCategory = (key) => {
 }
 </script>
 
-<!-- ✅ 这里的旧 <script> 块已经被彻底删除了，千万不要加回来 -->
-
 <style scoped lang="scss">
-$primary-color: #409eff;
-$text-main: #303133;
-$text-secondary: #909399;
-$border-radius: 12px;
-$container-width: 1200px;
+@use "sass:color";
 
-.bookstore-app {
-  background-color: #f5f7fa;
+$tomato-main: #ff6700;
+$dark-text: #2c3e50;
+$gray-text: #606266;
+
+.bookstore-home {
+  background-color: #f8f9fa;
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  padding-bottom: 60px;
 }
 
 .container {
-  max-width: $container-width;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px;
 }
 
-/* 轮播图 */
-.banner-carousel {
-  border-radius: $border-radius;
+/* ================== 1. 沉浸式轮播 Banner ================== */
+.banner-wrapper {
+  margin-bottom: 40px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-  margin-bottom: 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
 
-  .banner-item {
-    height: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 80px;
-    color: white;
-    position: relative;
-  }
-  .banner-content {
-    z-index: 2;
-    max-width: 50%;
-    .banner-tag {
-      background: rgba(255,255,255,0.2);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-      backdrop-filter: blur(5px);
+.premium-carousel {
+  :deep(.el-carousel__indicators--horizontal) {
+    bottom: 20px;
+    .el-carousel__button {
+      width: 30px; height: 4px; border-radius: 2px;
+      background-color: rgba(0,0,0,0.2);
     }
-    h1 { font-size: 36px; margin: 16px 0; line-height: 1.2; }
-    p { font-size: 18px; margin-bottom: 24px; opacity: 0.9; }
+    .is-active .el-carousel__button { background-color: $tomato-main; width: 40px; }
   }
 }
 
-/* 特色分类 Grid */
-.feature-grid {
+.banner-slide {
+  height: 100%;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 30px;
+  padding: 0 100px;
+  position: relative;
+}
 
-  .feature-item {
-    flex: 1;
-    background: white;
-    border-radius: $border-radius;
-    padding: 20px;
-    display: flex;
+.banner-content {
+  flex: 1;
+  z-index: 2;
+
+  .tag-badge {
+    display: inline-flex;
     align-items: center;
-    cursor: pointer;
+    background: rgba(255, 103, 0, 0.1);
+    color: $tomato-main;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    gap: 5px;
+  }
+
+  .title {
+    font-size: 42px;
+    font-weight: 800;
+    color: $dark-text;
+    margin: 0 0 16px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: $gray-text;
+    margin-bottom: 32px;
+    font-weight: 400;
+  }
+
+  .action-btn {
+    padding: 12px 36px;
+    font-weight: 600;
+    background-color: $dark-text;
+    border-color: $dark-text;
     transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 
     &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      background-color: $tomato-main;
+      border-color: $tomato-main;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(255, 103, 0, 0.3);
     }
-
-    .feature-icon {
-      width: 48px; height: 48px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-right: 15px;
-    }
-    .feature-title { font-size: 16px; font-weight: 600; color: $text-main; }
   }
 }
 
-/* 推荐板块 */
-.recommend-section {
-  background: white; /* 如果想要纯背景，可以去掉这个 background 和 padding */
-  border-radius: $border-radius;
-  padding: 24px;
-  margin-bottom: 40px;
+.banner-visual {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  position: relative;
+
+  .visual-circle {
+    position: absolute;
+    width: 300px; height: 300px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.4;
+    filter: blur(40px);
+    z-index: 1;
+  }
+
+  .featured-cover {
+    width: 220px;
+    height: 320px;
+    border-radius: 8px;
+    box-shadow: -10px 20px 40px rgba(0,0,0,0.2);
+    transform: perspective(800px) rotateY(-15deg);
+    z-index: 2;
+    transition: transform 0.5s ease;
+  }
+}
+
+.banner-slide:hover .featured-cover {
+  transform: perspective(800px) rotateY(-5deg) scale(1.05);
+}
+
+/* ================== 2. 功能分类 Dock (优化版) ================== */
+.feature-dock {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+
+  .icon-box {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+
+    .el-icon {
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    }
+  }
+
+  .text-box {
+    flex: 1;
+    h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+      letter-spacing: 0.5px;
+    }
+    p {
+      margin: 0;
+      font-size: 12px;
+      color: #909399;
+    }
+  }
+
+  .action-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #f2f2f2;
+    color: #999;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s;
+  }
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+
+    .icon-box {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .action-icon {
+      opacity: 1;
+      transform: translateX(0);
+      background-color: $tomato-main;
+      color: white;
+    }
+  }
+}
+
+/* ================== 3. 3D 书架展示 (全量适配) ================== */
+.bookshelf-section {
+  margin-bottom: 60px;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  h2 { font-size: 24px; font-weight: bold; margin: 0; color: $text-main; }
+  align-items: flex-end;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaeaea;
+
+  .title-group {
+    h2 {
+      font-size: 28px; color: $dark-text; margin: 0; display: inline-block; position: relative;
+    }
+    .subtitle-text {
+      font-size: 14px; color: #999; margin-left: 15px; font-weight: normal;
+    }
+    .indicator {
+      display: inline-block; width: 4px; height: 24px;
+      background: $tomato-main; margin-right: 12px; vertical-align: bottom;
+      border-radius: 2px;
+    }
+  }
+
+  .more-btn {
+    font-size: 14px; color: #666;
+    &:hover { color: $tomato-main; }
+  }
 }
 
-/* Grid */
-.book-grid {
+.bookshelf-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 50px 30px;
+  justify-content: center;
 }
 
-.site-footer {
-  text-align: center; padding: 40px 0; color: $text-secondary; border-top: 1px solid #eee; background: white; margin-top: 40px;
+.book-item-wrapper {
+  cursor: pointer;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+/* --- 3D 书籍 CSS --- */
+.book-3d {
+  position: relative;
+  width: 140px;
+  height: 200px;
+  margin: 0 auto 20px;
+  perspective: 1000px;
+  transition: transform 0.4s ease;
+}
+
+.book-cover {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  /* 默认左转，露出书脊 */
+  transform: rotateY(-25deg) translateX(5px);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 8px 12px 20px rgba(0,0,0,0.12);
+  border-radius: 2px 5px 5px 2px;
+
+  img {
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 2px 5px 5px 2px;
+    background: #fff;
+  }
+}
+
+.book-spine {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(0,0,0,0.1));
+  transform: rotateY(90deg) translateZ(-7px);
+  background-color: #efefef;
+  border-left: 1px solid rgba(0,0,0,0.05);
+}
+
+.book-sheen {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 悬停效果 */
+.book-item-wrapper:hover .book-cover {
+  transform: rotateY(0deg) scale(1.05) translateZ(10px);
+  box-shadow: 0 20px 30px rgba(0,0,0,0.18);
+}
+
+.book-item-wrapper:active .book-cover {
+  transform: scale(0.96);
+}
+
+/* 书籍信息 */
+.book-info {
+  text-align: center;
+  padding: 0 5px;
+
+  .book-title {
+    font-size: 15px; margin: 0 0 4px; color: #333;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    height: 42px;
+  }
+
+  .book-author {
+    font-size: 12px; color: #999; margin: 0 0 8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .book-meta {
+    display: flex; justify-content: center; align-items: center; gap: 6px;
+
+    .price {
+      color: $tomato-main; font-size: 16px; font-weight: 700;
+      .symbol { font-size: 12px; margin-right: 1px; }
+    }
+
+    .score-tag {
+      font-weight: bold;
+      transform: scale(0.9);
+    }
+  }
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .banner-slide { padding: 0 20px; flex-direction: column-reverse; text-align: center; justify-content: center; }
+  .banner-visual { margin-bottom: 20px; }
+  .feature-dock { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+  .banner-content .title { font-size: 24px; }
+  .banner-content .subtitle { display: none; }
+
+  .bookshelf-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px 15px;
+  }
+  .book-3d { width: 120px; height: 170px; }
+  .book-title { font-size: 13px; }
 }
 </style>

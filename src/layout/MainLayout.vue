@@ -1,89 +1,172 @@
 <template>
   <div class="common-layout">
     <el-container class="layout-container">
-      <!-- 顶栏：全局唯一 -->
+
+      <!-- 顶栏 Header -->
       <el-header class="site-header">
         <div class="header-inner">
 
-          <!-- 1. Logo 区域 (点击回首页) -->
-          <div class="logo-wrapper" @click="router.push('/')">
-            <span class="logo-icon">🍅</span>
-            <h1 class="logo-text">番茄商城</h1>
+          <!-- 1. Logo 区域 -->
+          <div class="logo-section" @click="router.push('/')">
+            <div class="logo-icon-box">
+              <el-icon><Shop /></el-icon>
+            </div>
+            <div class="logo-text-box">
+              <h1 class="brand-name">番茄商城</h1>
+              <span class="brand-slogan">Tomato Mall</span>
+            </div>
           </div>
 
-          <!-- 2. 搜索区域 (居中) -->
-          <div class="search-section">
-            <el-input
-                v-model="searchKeyword"
-                placeholder="搜索感兴趣的好书、数码..."
-                class="custom-search"
-                @keyup.enter="handleSearch"
-            >
-              <template #append>
-                <el-button :icon="Search" class="search-btn" @click="handleSearch" />
-              </template>
-            </el-input>
+          <!-- 2. 搜索区域 (包含热搜词) -->
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <el-input
+                  v-model="searchKeyword"
+                  placeholder="搜索 iPhone 15 / Java编程思想..."
+                  class="mall-search"
+                  @keyup.enter="handleSearch"
+              >
+                <template #append>
+                  <el-button class="search-btn" @click="handleSearch">
+                    <el-icon><Search /></el-icon> 搜索
+                  </el-button>
+                </template>
+              </el-input>
+            </div>
+            <!-- 热搜推荐词 -->
+            <div class="hot-tags">
+              <a href="#">限时秒杀</a>
+              <a href="#">新书上架</a>
+              <a href="#">数码家电</a>
+              <a href="#" class="highlight">会员福利</a>
+            </div>
           </div>
 
-          <!-- 3. 右侧导航 -->
+          <!-- 3. 右侧导航操作 -->
           <div class="nav-actions">
-            <el-button link class="nav-item" @click="router.push('/')">
-              <template #icon><el-icon><HomeFilled /></el-icon></template>
+            <!-- 首页链接 -->
+            <el-button link class="nav-link" @click="router.push('/')">
               首页
             </el-button>
 
-            <!-- 购物车 (点击跳转) -->
+            <!-- 购物车 (胶囊样式) -->
             <el-badge :value="cartCount" :max="99" class="cart-badge">
-              <el-button link class="nav-item" @click="router.push('/cart')">
-                <template #icon><el-icon><ShoppingCart /></el-icon></template>
-                购物车
+              <el-button class="cart-btn" round @click="router.push('/cart')">
+                <el-icon><ShoppingCart /></el-icon>
+                <span>购物车</span>
               </el-button>
             </el-badge>
 
-            <!-- 登录状态判断 -->
-            <div class="user-menu" v-if="isLogin">
-              <!-- 绑定 command 事件处理跳转 -->
-              <el-dropdown trigger="click" @command="handleCommand">
-                <div class="avatar-wrapper">
-                  <el-avatar :size="32" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-                  <span class="username">Admin</span>
-                  <el-icon><CaretBottom /></el-icon>
-                </div>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <!-- command 对应路由路径 -->
-                    <el-dropdown-item command="/user/profile" icon="User">个人中心</el-dropdown-item>
-                    <el-dropdown-item command="/user/orders" icon="Tickets">我的订单</el-dropdown-item>
-                    <el-dropdown-item divided command="logout" icon="SwitchButton">退出登录</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
+            <!-- 分割线 -->
+            <el-divider direction="vertical" class="nav-divider" />
 
-            <!-- 未登录状态 -->
-            <div v-else class="auth-btns">
-              <el-button link @click="router.push('/login')">登录</el-button>
-              <el-button type="primary" round color="#ff6700" @click="router.push('/register')">注册</el-button>
+            <!-- 用户菜单 -->
+            <div class="user-area">
+              <template v-if="isLogin">
+                <el-dropdown trigger="click" @command="handleCommand">
+                  <div class="user-profile">
+                    <el-avatar :size="34" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+                    <div class="user-info">
+                      <span class="name">Admin</span>
+                      <el-icon class="arrow"><CaretBottom /></el-icon>
+                    </div>
+                  </div>
+                  <template #dropdown>
+                    <el-dropdown-menu class="user-dropdown">
+                      <el-dropdown-item command="/user/profile" icon="User">个人中心</el-dropdown-item>
+                      <el-dropdown-item command="/user/orders" icon="Tickets">我的订单</el-dropdown-item>
+                      <el-dropdown-item divided command="logout" icon="SwitchButton">退出登录</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </template>
+
+              <!-- 未登录 -->
+              <template v-else>
+                <div class="auth-links">
+                  <el-button link class="login-link" @click="router.push('/login')">登录</el-button>
+                  <el-button type="primary" class="reg-btn" round @click="router.push('/register')">注册</el-button>
+                </div>
+              </template>
             </div>
           </div>
         </div>
       </el-header>
 
-      <!-- 主内容区：路由出口 -->
+      <!-- 主内容区 -->
       <el-main class="main-body">
-        <!-- 这里的 router-view 会渲染 Home, UserProfile, OrderList 等组件 -->
         <router-view />
       </el-main>
 
-      <!-- 页脚 -->
+      <!-- 页脚 (保持之前的优化) -->
       <el-footer class="site-footer">
-        <div class="footer-content">
-          <p>© 2025 番茄商城 Tomato Store - Lab2 Project</p>
-          <div class="footer-links">
-            <el-button link size="small">关于我们</el-button>
-            <el-button link size="small">联系客服</el-button>
-            <el-button link size="small">隐私政策</el-button>
+        <div class="service-features">
+          <div class="feature-item">
+            <el-icon :size="24"><CircleCheck /></el-icon>
+            <span>正品保证</span>
           </div>
+          <div class="feature-item">
+            <el-icon :size="24"><Van /></el-icon>
+            <span>七天退换</span>
+          </div>
+          <div class="feature-item">
+            <el-icon :size="24"><Lightning /></el-icon>
+            <span>极速发货</span>
+          </div>
+          <div class="feature-item">
+            <el-icon :size="24"><Medal /></el-icon>
+            <span>优质售后</span>
+          </div>
+        </div>
+
+        <div class="footer-main">
+          <div class="footer-links-area">
+            <dl class="link-column">
+              <dt>购物指南</dt>
+              <dd><a href="#">购物流程</a></dd>
+              <dd><a href="#">会员介绍</a></dd>
+              <dd><a href="#">常见问题</a></dd>
+            </dl>
+            <dl class="link-column">
+              <dt>配送方式</dt>
+              <dd><a href="#">上门自提</a></dd>
+              <dd><a href="#">配送服务查询</a></dd>
+              <dd><a href="#">配送费收取标准</a></dd>
+            </dl>
+            <dl class="link-column">
+              <dt>支付方式</dt>
+              <dd><a href="#">在线支付</a></dd>
+              <dd><a href="#">分期付款</a></dd>
+              <dd><a href="#">公司转账</a></dd>
+            </dl>
+            <dl class="link-column">
+              <dt>售后服务</dt>
+              <dd><a href="#">售后政策</a></dd>
+              <dd><a href="#">退款说明</a></dd>
+              <dd><a href="#">取消订单</a></dd>
+            </dl>
+          </div>
+
+          <div class="footer-contact">
+            <p class="phone">400-123-4567</p>
+            <p class="desc">周一至周日 8:00-18:00</p>
+            <el-button round plain class="contact-btn">
+              <el-icon><ChatDotRound /></el-icon> 联系在线客服
+            </el-button>
+          </div>
+        </div>
+
+        <div class="copyright-bar">
+          <div class="info-text">
+            <span>关于我们</span><span class="divider">|</span>
+            <span>联系我们</span><span class="divider">|</span>
+            <span>人才招聘</span><span class="divider">|</span>
+            <span>商家入驻</span>
+          </div>
+          <p class="copyright-text">
+            © 2025 番茄书城 (Tomato Bookstore) 版权所有 <br/>
+            本网站仅供课程实验 (Lab2) 演示使用，不涉及真实商业交易 | ICP证：浙B2-20250000
+          </p>
         </div>
       </el-footer>
     </el-container>
@@ -96,30 +179,25 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   Search,
-  HomeFilled,
   ShoppingCart,
   CaretBottom,
   User,
   Tickets,
-  SwitchButton
+  SwitchButton,
+  CircleCheck, Van, Lightning, Medal, ChatDotRound,
+  Shop // 新增图标
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
-
-// --- 状态数据 ---
 const searchKeyword = ref('')
-const isLogin = ref(true) // 模拟登录状态
+const isLogin = ref(true)
 const cartCount = ref(5)
 
-// --- 事件处理 ---
-
-// 1. 搜索
 const handleSearch = () => {
   if (!searchKeyword.value.trim()) return
   console.log('搜索:', searchKeyword.value)
 }
 
-// 2. 下拉菜单命令处理
 const handleCommand = (command) => {
   if (command === 'logout') {
     isLogin.value = false
@@ -132,13 +210,13 @@ const handleCommand = (command) => {
 </script>
 
 <style scoped lang="scss">
-/* ✅ 1. 引入 Sass 颜色模块来解决警告 */
 @use "sass:color";
 
-/* 定义番茄主题色变量 */
-$tomato-color: #ff6700;
-$tomato-light: #ffefe6;
-$text-main: #333;
+/* 变量定义 */
+$tomato-main: #ff6700;
+$tomato-dark: #e05a00;
+$gray-bg: #f5f7fa;
+$border-color: #e0e0e0;
 $layout-width: 1200px;
 
 .layout-container {
@@ -147,15 +225,16 @@ $layout-width: 1200px;
   flex-direction: column;
 }
 
-/* --- Header 样式 --- */
+/* ================= Header 区域优化 ================= */
 .site-header {
   background: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  /* 增加高度以容纳热搜词 */
+  height: 90px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 1000;
   padding: 0;
-  height: 64px;
 }
 
 .header-inner {
@@ -168,163 +247,305 @@ $layout-width: 1200px;
   padding: 0 20px;
 }
 
-/* Logo */
-.logo-wrapper {
+/* 1. Logo 样式 */
+.logo-section {
   display: flex;
   align-items: center;
+  gap: 12px;
   cursor: pointer;
-  user-select: none;
-  transition: opacity 0.2s;
 
-  &:hover {
-    opacity: 0.8;
+  .logo-icon-box {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, $tomato-main, $tomato-dark);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 26px;
+    box-shadow: 0 4px 10px rgba(255, 103, 0, 0.3);
   }
 
-  .logo-icon {
-    font-size: 28px;
-    margin-right: 8px;
-  }
+  .logo-text-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-  .logo-text {
-    font-size: 22px;
-    font-weight: 800;
-    color: $tomato-color;
-    margin: 0;
-    letter-spacing: 1px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: #333;
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand-slogan {
+      font-size: 12px;
+      color: #999;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
   }
 }
 
-/* 搜索栏深度定制 */
-.search-section {
+/* 2. 搜索框样式 (居中且现代化) */
+.search-container {
   flex: 1;
-  max-width: 500px;
-  margin: 0 40px;
+  max-width: 580px;
+  margin: 0 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-  /* 穿透修改 Element Plus 样式 */
-  :deep(.el-input-group__append) {
-    background-color: $tomato-color;
-    border-color: $tomato-color;
-    color: white;
-    transition: 0.3s;
-    box-shadow: none;
-
-    &:hover {
-      /* ✅ 2. 使用 color.adjust 替代 darken */
-      background-color: color.adjust($tomato-color, $lightness: -5%);
-    }
+.search-input-wrapper {
+  /* 深度穿透修改 Element Plus 样式 */
+  :deep(.el-input-group--append .el-input__wrapper) {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    box-shadow: 0 0 0 2px $tomato-main inset; /* 强制边框色 */
+    padding-left: 15px;
   }
 
-  :deep(.el-input__wrapper) {
-    box-shadow: 0 0 0 1px #dcdfe6 inset;
-    &:hover {
-      box-shadow: 0 0 0 1px #c0c4cc inset;
-    }
-    &.is-focus {
-      box-shadow: 0 0 0 1px $tomato-color inset;
+  :deep(.el-input-group__append) {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    background-color: $tomato-main;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    padding: 0 25px;
+
+    .search-btn {
+      color: #fff;
+      font-weight: bold;
+      &:hover {
+        background: transparent;
+      }
     }
   }
 }
 
-/* 右侧导航 */
+.hot-tags {
+  margin-top: 6px;
+  padding-left: 12px;
+  font-size: 12px;
+  color: #999;
+
+  a {
+    color: #757575;
+    margin-right: 15px;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $tomato-main;
+    }
+
+    &.highlight {
+      color: $tomato-main;
+    }
+  }
+}
+
+/* 3. 右侧导航样式 */
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 24px;
+  height: 40px; /* 约束高度便于对齐 */
 
-  .nav-item {
+  .nav-link {
     font-size: 15px;
     color: #555;
-    padding: 0;
-    height: auto;
-    font-weight: 500;
 
     &:hover {
-      color: $tomato-color;
+      color: $tomato-main;
     }
   }
 
-  /* 购物车角标微调 */
+  /* 购物车按钮 */
   .cart-badge {
+    margin-left: 15px;
+    margin-right: 5px;
+
     :deep(.el-badge__content) {
-      background-color: $tomato-color;
-      border: none;
-      right: 2px;
+      background-color: $tomato-main;
+      border: 1px solid #fff;
     }
+
+    .cart-btn {
+      border-color: #dcdfe6;
+      color: #555;
+      padding: 8px 18px;
+      transition: all 0.3s;
+
+      .el-icon { margin-right: 4px; font-size: 16px; }
+
+      &:hover {
+        color: $tomato-main;
+        border-color: $tomato-main;
+        background-color: color.adjust($tomato-main, $lightness: 45%);
+      }
+    }
+  }
+
+  .nav-divider {
+    height: 18px;
+    margin: 0 15px;
+    border-color: #ddd;
   }
 }
 
-/* 用户菜单 */
-.user-menu {
-  margin-left: 10px;
-}
-
-.avatar-wrapper {
+/* 用户菜单胶囊 */
+.user-area {
   display: flex;
   align-items: center;
-  cursor: pointer;
-  gap: 8px;
-  padding: 4px 8px;
-  border-radius: 20px;
-  transition: background 0.2s;
-  user-select: none;
 
-  &:hover {
-    background: #f5f5f5;
+  .user-profile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 4px 8px 4px 4px;
+    border-radius: 24px;
+    transition: background 0.2s;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: #f0f0f0;
+      border-color: #ebebeb;
+    }
+
+    .user-info {
+      margin-left: 8px;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+
+      .name {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .arrow {
+        font-size: 10px;
+        color: #999;
+        margin-top: 2px;
+      }
+    }
   }
 
-  .username {
-    font-size: 14px;
-    color: $text-main;
-    font-weight: 500;
-  }
+  /* 未登录按钮 */
+  .auth-links {
+    .login-link {
+      color: #666;
+      font-size: 14px;
+      &:hover { color: $tomato-main; }
+    }
 
-  .el-icon {
-    color: #999;
-    font-size: 12px;
+    .reg-btn {
+      background-color: $tomato-main;
+      border-color: $tomato-main;
+      margin-left: 10px;
+      padding: 8px 20px;
+      font-size: 14px;
+
+      &:hover {
+        background-color: $tomato-dark;
+        border-color: $tomato-dark;
+      }
+    }
   }
 }
 
-/* --- 主体与页脚 --- */
+/* ================= 主体与页脚 (保持不变或微调) ================= */
 .main-body {
-  background-color: #f5f7fa;
+  background-color: $gray-bg;
   padding: 0;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
 }
 
 .site-footer {
-  background: #333;
-  color: #999;
-  padding: 40px 0;
-  height: auto;
-  border-top: 1px solid #444;
+  background-color: #fff;
+  padding: 0;
+  margin-top: auto;
+  border-top: 1px solid $border-color;
+  color: #616161;
+}
 
-  .footer-content {
-    max-width: $layout-width;
-    margin: 0 auto;
+.service-features {
+  padding: 30px 0;
+  border-bottom: 1px solid $border-color;
+  display: flex;
+  justify-content: center;
+  background-color: #fff; /* 纯白背景更显干净 */
+
+  .feature-item {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+    width: 20%;
+    border-right: 1px solid #eee;
+    font-size: 16px;
+    color: #333;
 
-    p {
-      margin: 0;
-      font-size: 14px;
-    }
+    &:last-child { border-right: none; }
+    .el-icon { margin-right: 8px; font-size: 26px; color: #333; }
+    span { font-weight: 500; }
   }
+}
 
-  .footer-links {
-    display: flex;
-    gap: 10px;
+.footer-main {
+  width: $layout-width;
+  margin: 0 auto;
+  padding: 45px 0;
+  display: flex;
+  justify-content: space-between;
+}
 
-    .el-button {
-      color: #bbb;
-      font-weight: normal;
-      &:hover { color: white; }
-    }
+.footer-links-area {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  gap: 90px;
+
+  dt { font-size: 15px; color: #333; margin-bottom: 22px; font-weight: 600; }
+  dd a {
+    color: #757575;
+    font-size: 13px;
+    text-decoration: none;
+    line-height: 2.2;
+    &:hover { color: $tomato-main; }
+  }
+}
+
+.footer-contact {
+  width: 260px;
+  text-align: center;
+
+  .phone { font-size: 24px; color: $tomato-main; margin: 0 0 5px; font-weight: 700; }
+  .desc { font-size: 12px; color: #757575; margin-bottom: 18px; }
+  .contact-btn {
+    border-color: $tomato-main;
+    color: $tomato-main;
+    padding: 18px 25px;
+    &:hover { background-color: $tomato-main; color: #fff; }
+  }
+}
+
+.copyright-bar {
+  background-color: #333; /* 改为深色底，更正式 */
+  color: #999;
+  padding: 25px 0;
+  text-align: center;
+  font-size: 12px;
+
+  .info-text {
+    margin-bottom: 10px;
+    span { margin: 0 5px; cursor: pointer; &:hover { color: #fff; } }
+    .divider { color: #555; }
   }
 }
 </style>
