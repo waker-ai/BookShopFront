@@ -260,6 +260,7 @@ const submitOrder = () => {
 </script>
 
 <style scoped lang="scss">
+@use "sass:color";
 $primary-color: #ff6700;
 $border-color: #e4e7ed;
 
@@ -312,7 +313,7 @@ $border-color: #e4e7ed;
   justify-content: space-between;
 
   &:hover {
-    border-color: lighten($primary-color, 20%);
+    border-color: color.scale($primary-color, $lightness: 20%);
     box-shadow: 0 2px 12px rgba(0,0,0,0.05);
   }
 
@@ -502,7 +503,7 @@ $border-color: #e4e7ed;
       border-color: $primary-color;
       border-radius: 22px;
 
-      &:hover { background-color: lighten($primary-color, 5%); }
+      &:hover { background-color: color.scale($primary-color, $lightness: 5%); }
     }
   }
 }
