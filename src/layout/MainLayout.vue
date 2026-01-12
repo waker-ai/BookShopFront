@@ -22,7 +22,7 @@
             <div class="search-input-wrapper">
               <el-input
                   v-model="searchKeyword"
-                  placeholder="搜索 iPhone 15 / Java编程思想..."
+                  placeholder="搜索Java编程思想..."
                   class="mall-search"
                   @keyup.enter="handleSearch"
               >
@@ -35,9 +35,9 @@
             </div>
             <!-- 热搜推荐词 -->
             <div class="hot-tags">
-              <a href="#">限时秒杀</a>
-              <a href="#">新书上架</a>
-              <a href="#">数码家电</a>
+              <a href="#">今日精选</a>
+              <a href="#">新书推荐</a>
+              <a href="#">读者热选</a>
               <a href="#" class="highlight">会员福利</a>
             </div>
           </div>
